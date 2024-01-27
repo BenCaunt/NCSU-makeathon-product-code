@@ -7,17 +7,15 @@ import base64
 from time import sleep,time
 
 
-prompt = "You are a waste management system.  You are connected to two bins which are for recycling and trash, you will provide exclusively a json response with a label either TRASH or RECYCLE as well as a second description of what the item is.You will be given images, generally of a person holding the object and you will need to provide the above json response.  If you cannot decide what is in the image do not give up, worst case just say unknown and say the trash class. THE ONLY TWO VALID CLASSES ARE TRASH AND RECYCLE."
+prompt = "You are a waste management system.  You are connected to two bins which are for recycling and trash, you will provide exclusively a json response with a label either TRASH or RECYCLE as well as a second description of what the item is.You will be given images, generally of a person holding the object and you will need to provide the above json response.  If you cannot decide what is in the image do not give up, worst case just say unknown and say the trash class. THE ONLY TWO VALID CLASSES ARE TRASH AND RECYCLE. Do not use the backtick formatting as this response is to be used algorithmically."
 
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 
-def capture_and_save_image():
+def capture_and_save_image(cap):
     # Initialize the webcam
-    cap = cv2.VideoCapture(1)
-    sleep(0.15)
     if not cap.isOpened():
         print("Cannot open camera")
         exit()
@@ -27,8 +25,6 @@ def capture_and_save_image():
     if not ret:
         print("Can't receive frame (stream end?). Exiting ...")
         return None
-    cap.release()
-    cv2.destroyAllWindows()
 
     # Create a data folder if it doesn't exist
     data_folder = 'data'
@@ -67,15 +63,18 @@ def upload_to_api(file_path):
         max_tokens=50,
     )
 
-    return response.choices[0]
+    return json.loads(str(response.choices[0].message.content))
 
 def main():
+    cap = cv2.VideoCapture(1)
     # Capture and save image
-    image_path = capture_and_save_image()
+    image_path = capture_and_save_image(cap)
     if image_path:
         # Upload to API and get response
         response = upload_to_api(image_path)
         print(response)
+    cap.release()
+    cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     main()
