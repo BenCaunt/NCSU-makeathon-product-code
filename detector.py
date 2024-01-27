@@ -67,14 +67,17 @@ def upload_to_api(file_path):
 
 def main():
     cap = cv2.VideoCapture(1)
+    initial_time = time()
     # Capture and save image
     image_path = capture_and_save_image(cap)
     if image_path:
         # Upload to API and get response
         response = upload_to_api(image_path)
         print(response)
+    print(time() - initial_time)
     cap.release()
     cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     main()
