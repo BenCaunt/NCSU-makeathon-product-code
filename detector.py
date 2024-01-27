@@ -1,13 +1,23 @@
 import cv2
-import requests
 import json
 import os
 from datetime import datetime
 from openai import OpenAI
+import base64
+from time import sleep,time
+
+
+prompt = "You are a waste management system.  You are connected to two bins which are for recycling and trash, you will provide exclusively a json response with a label either TRASH or RECYCLE as well as a second description of what the item is.You will be given images, generally of a person holding the object and you will need to provide the above json response.  If you cannot decide what is in the image do not give up, worst case just say unknown and say the trash class. THE ONLY TWO VALID CLASSES ARE TRASH AND RECYCLE."
+
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
 
 def capture_and_save_image():
     # Initialize the webcam
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
+    sleep(0.15)
     if not cap.isOpened():
         print("Cannot open camera")
         exit()
@@ -32,10 +42,10 @@ def capture_and_save_image():
 
 def upload_to_api(file_path):
     # Open the image file in binary mode
-    with open(file_path, 'rb') as file:
-        image_data = file.read()
-
-    client = OpenAI()
+    encode_image_start = time()
+    base64_image = encode_image(file_path)
+    print(time() - encode_image_start)
+    client = OpenAI(api_key = "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")
 
     # Replace 'model_id' with the appropriate model ID
     response = client.chat.completions.create(
@@ -44,17 +54,17 @@ def upload_to_api(file_path):
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": "What’s in this image?"},
+                    {"type": "text", "text": prompt},
                     {
                         "type": "image_url",
                         "image_url": {
-                            "url": file_path,
+                            "url": f"data:image/jpeg;base64,{base64_image}",
                         },
                     },
                 ],
             }
         ],
-        max_tokens=300,
+        max_tokens=50,
     )
 
     return response.choices[0]
