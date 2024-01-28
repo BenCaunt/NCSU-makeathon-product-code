@@ -2,6 +2,7 @@ import cv2
 import json
 import os
 from datetime import datetime
+from httpx import Response
 from openai import OpenAI
 import base64
 from time import sleep,time
@@ -65,6 +66,14 @@ def upload_to_api(file_path):
 
     return json.loads(str(response.choices[0].message.content))
 
+def capture_frame_and_assess(cap):
+    image_path = capture_and_save_image(cap)
+    if image_path:
+        response = upload_to_api(image_path)
+        type = response.get("label")
+        print(type)
+        return type
+    return "TRASH"
 def main():
     cap = cv2.VideoCapture(1)
     initial_time = time()
