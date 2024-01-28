@@ -11,7 +11,7 @@ Servo recycle;
 Servo trash;
 const int recycle_close = 73;
 const int trash_close = 0;
-const int recycle_open = 45;
+const int recycle_open = 30;
 const int trash_open = 45;
 
 bool is_bin_closed = true;

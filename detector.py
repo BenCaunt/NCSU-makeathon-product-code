@@ -42,7 +42,7 @@ def upload_to_api(file_path):
     encode_image_start = time()
     base64_image = encode_image(file_path)
     print(time() - encode_image_start)
-    client = OpenAI(api_key = "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")
+    client = OpenAI(api_key = "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")
 
     # Replace 'model_id' with the appropriate model ID
     response = client.chat.completions.create(
@@ -71,7 +71,7 @@ def capture_frame_and_assess(cap):
     if image_path:
         response = upload_to_api(image_path)
         type = response.get("label")
-        print(type)
+        print(response)
         return type
     return "TRASH"
 def main():
